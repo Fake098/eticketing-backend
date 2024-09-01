@@ -1,7 +1,6 @@
 const mongoose = require("mongoose");
 const Event = require("./models/Event"); // Adjust the path as needed
 const dotenv = require("dotenv");
-const Ticket = require("./models/Ticket");
 
 dotenv.config();
 mongoose.connect(process.env.MONGO_URI, {
@@ -9,38 +8,67 @@ mongoose.connect(process.env.MONGO_URI, {
 	useUnifiedTopology: true,
 });
 
-const createTicketsForEvent = async (eventId, seatNumbers, price) => {
-	const tickets = seatNumbers.map((seatNumber) => ({
-		event: eventId,
-		seatNumber,
-		price,
-	}));
+// Function to generate seats
+const generateSeats = (totalSeats) => {
+	const seats = [];
+	const columns = 20; // Fixed number of columns
+	const rows = Math.ceil(totalSeats / columns); // Calculate rows based on total seats and columns
 
-	return Ticket.insertMany(tickets);
+	for (let row = 1; row <= rows; row++) {
+		for (let col = 1; col <= columns; col++) {
+			if ((row - 1) * columns + col <= totalSeats) {
+				// Ensure we don't exceed totalSeats
+				const seatNumber = String.fromCharCode(64 + row) + col;
+				seats.push({ seatNumber, isAvailable: true });
+			}
+		}
+	}
+	return seats;
 };
 
-const seedTickets = async () => {
+// Define multiple example events
+const exampleEvents = [
+	{
+		name: "Rock Concert",
+		venue: "Madison Square Garden",
+		date: new Date("2024-09-15"),
+		description: "An epic night of rock and roll.",
+		ticketsAvailable: 100,
+		ticketPrice: 75,
+		seats: generateSeats(100), // Generate seats with 20 columns
+	},
+	{
+		name: "Jazz Festival",
+		venue: "Central Park",
+		date: new Date("2024-10-05"),
+		description: "A relaxing evening of jazz music.",
+		ticketsAvailable: 300,
+		ticketPrice: 50,
+		seats: generateSeats(300), // Generate seats with 20 columns
+	},
+	{
+		name: "Soccer Match",
+		venue: "Yankee Stadium",
+		date: new Date("2024-11-10"),
+		description: "An exciting soccer match between top teams.",
+		ticketsAvailable: 200,
+		ticketPrice: 100,
+		seats: generateSeats(200), // Generate seats with 20 columns
+	},
+];
+
+// Seed the events
+const seedEvents = async () => {
 	try {
-		// Retrieve example events from the database
-		const events = await Event.find();
-
-		if (events.length === 0) {
-			console.log("No events found. Please add events first.");
-			return;
-		}
-
-		// For each event, create a set of example tickets
-		for (const event of events) {
-			const seatNumbers = ["A1", "A2", "A3", "B1", "B2", "B3"]; // Example seat numbers
-			await createTicketsForEvent(event._id, seatNumbers, event.ticketPrice);
-			console.log(`Tickets created for event: ${event.name}`);
-		}
-
-		console.log("Example tickets added to the database");
-		mongoose.connection.close(); // Close the connection after insertion
+		await Event.deleteMany(); // Clear existing events
+		await Event.insertMany(exampleEvents); // Insert example events
+		console.log("Example events added to the database");
 	} catch (err) {
-		console.error("Error inserting tickets:", err);
+		console.error("Error inserting events:", err);
+	} finally {
+		mongoose.connection.close(); // Close the connection
 	}
 };
 
-seedTickets();
+// Run the seeding script
+seedEvents();

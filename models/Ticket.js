@@ -9,6 +9,7 @@ const ticketSchema = new mongoose.Schema(
 			required: true,
 		},
 		user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+		seatNumber: { type: String, required: true }, // Track the specific seat number
 		code: { type: String, required: true, unique: true, default: uuidv4 },
 		isValid: { type: Boolean, default: true },
 	},
