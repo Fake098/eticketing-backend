@@ -50,30 +50,4 @@ const purchaseTicket = async (req, res) => {
 	}
 };
 
-const getTicketsForEvent = async (req, res) => {
-	const { eventId } = req.params;
-
-	try {
-		const tickets = await Ticket.find({ event: eventId, user: req.user._id });
-		res.json(tickets);
-	} catch (error) {
-		res.status(500).json({ message: "Server error" });
-	}
-};
-const getAllTickets = async (req, res) => {
-	try {
-		if (!req.user || !req.user._id) {
-			return res.status(401).json({ message: "User not authenticated" });
-		}
-
-		const tickets = await Ticket.find({ user: req.user._id }).populate(
-			"event",
-			"name"
-		);
-		res.json(tickets);
-	} catch (error) {
-		console.error("Error fetching tickets:", error); // Log the error
-		res.status(500).json({ message: "not working" });
-	}
-};
-module.exports = { purchaseTicket, getTicketsForEvent, getAllTickets };
+module.exports = { purchaseTicket };
