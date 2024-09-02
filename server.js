@@ -16,7 +16,7 @@ const app = express();
 // Set up CORS
 app.use(
 	cors({
-		origin: "http://localhost:5173", // Replace with your Vite dev server URL
+		origin: "http://localhost:5173", // Replace with your Vite dev server URL or your frontend URL
 		methods: ["GET", "POST", "PUT", "DELETE"],
 		credentials: true, // Enable this if you need to send cookies with the request
 	})
@@ -42,5 +42,5 @@ app.use("/api/tickets", ticketRoutes);
 app.use(notFound);
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// Export the app as a module
+module.exports = app;
